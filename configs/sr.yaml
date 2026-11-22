@@ -1,0 +1,28 @@
+# MURL-SR: direct MURL supervision and hallucination-aware DPO on VOSR-1.4B one-step (Eq. 23).
+vosr:
+  checkpoint: weights/VOSR/VOSR_1.4B_os         # pretrained model: candidate generator and DPO reference
+  vae: weights/VOSR/Qwen-Image-vae-2d
+murl: runs/murl/stage2/checkpoints/last.pt      # frozen stage 2 MURL
+data:
+  images: data/LSDIR/train
+  root: data/sr/LSDIR                           # hr/, lq/ (scripts/prepare_sr_data.py), pairs/ (scripts/make_pairs.py)
+  crop: 512
+  seed: 0
+pairs:
+  k: 32                                         # candidates per LR image (Eq. 18)
+  score_batch: 8
+train:
+  output: runs/sr
+  steps: 33000
+  batch: 64                                     # pairs per optimization step, over all GPUs
+  micro_batch: 2                                # pairs per GPU per forward pass (gradient accumulation)
+  lr: 3.0e-5
+  lora: {rank: 16, alpha: 16}
+  beta: 500
+  dpop: 1.0                                     # DPO-Positive: penalizes a preferred-sample error above the reference's
+  lambda_pref: 1.0
+  lambda_murl: 0.3
+  murl_items: 1                                 # per micro-batch: one-step outputs that receive the MURL loss
+  grad_clip: 1.0
+  ckpt_every: 1000
+  num_workers: 4

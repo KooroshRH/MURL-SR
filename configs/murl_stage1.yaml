@@ -1,0 +1,29 @@
+# MURL stage 1: modality-specific autoencoders (visual, segmentation, depth), trained jointly with independent losses.
+stage: 1
+seed: 0
+output: runs/murl/stage1            # checkpoints/, metrics.jsonl; a rerun resumes from checkpoints/last.pt
+data:
+  train: {images: data/LSDIR/train, maps: data/maps/LSDIR/train}        # maps: scripts/precompute_maps.py
+  val: {images: data/LSDIR/val1/HR/val, maps: data/maps/LSDIR/val1}     # null to skip validation
+  crop: 512
+  batch_size: 16                    # per GPU
+  num_workers: 8
+model:
+  latent_stride: 8
+  vis: {enc_channels: [64, 128, 256, 256], enc_blocks: [1, 1, 2, 2], dec_channels: [256, 256, 128, 64], dec_blocks: [2, 2, 1, 1], grad_checkpoint: true}
+  seg: {dec_channels: [128, 128, 64, 32], dec_blocks: [2, 2, 1, 1]}
+  depth: {dec_channels: [128, 128, 64, 32], dec_blocks: [2, 2, 1, 1]}
+loss:
+  rec: 1.0
+train:
+  max_steps: 200000
+  lr: 1.0e-4
+  warmup_steps: 2000                # linear warmup, then cosine decay to min_lr
+  min_lr: 1.0e-6
+  ema: 0.999
+  grad_clip: null
+  log_every: 100
+  val_every: 5000
+  val_batches: 32
+  ckpt_every: 2000
+  keep_every: 25000

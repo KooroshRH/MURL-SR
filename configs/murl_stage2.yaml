@@ -1,0 +1,39 @@
+# MURL stage 2: unified encoders, cross-attention, shared codebook and unified decoders (Eq. 11).
+stage: 2
+seed: 0
+output: runs/murl/stage2
+stage1: runs/murl/stage1/checkpoints/last.pt   # frozen modality-specific encoders for the orthogonality loss
+data:
+  train: {images: data/LSDIR/train, maps: data/maps/LSDIR/train}
+  val: {images: data/LSDIR/val1/HR/val, maps: data/maps/LSDIR/val1}
+  crop: 512
+  batch_size: 8                     # per GPU
+  num_workers: 8
+model:
+  latent_stride: 4
+  ca_kv_stride: 8                   # keys and values of the cross-attention average-pooled to H/8
+  heads: 4
+  num_codes: 8192
+  vq_levels: 4
+  vq_beta: 1.0                      # commitment weight (Eq. 9)
+  vq_restart_every: 100             # re-seed codes unused in the last 100 steps
+  vq_restart_until: 180000
+  vis: {enc_channels: [64, 128, 256, 256], enc_blocks: [1, 1, 2, 2], dec_channels: [256, 256, 128, 64], dec_blocks: [2, 2, 1, 1], grad_checkpoint: true}
+  seg: {dec_channels: [128, 128, 64, 32], dec_blocks: [2, 2, 1, 1]}
+  depth: {dec_channels: [128, 128, 64, 32], dec_blocks: [2, 2, 1, 1]}
+loss:                               # (gamma_1, gamma_2, gamma_3) of Eq. 11
+  rec: 1.0
+  vq: 1.0
+  orth: 0.1
+train:
+  max_steps: 200000
+  lr: 1.0e-4
+  warmup_steps: 2000
+  min_lr: 1.0e-6
+  ema: 0.999
+  grad_clip: 1.0
+  log_every: 100
+  val_every: 5000
+  val_batches: 32
+  ckpt_every: 2000
+  keep_every: 25000
