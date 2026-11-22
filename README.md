@@ -11,7 +11,8 @@
 <a href="https://huggingface.co/kooroshrh/MURL-SR"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Model-MURL--SR-yellow" alt="Hugging Face model"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"></a>
 
-<img src="assets/teaser.jpg" width="760" alt="Segmentation, depth and cross-modal discrepancy maps of generative SR outputs">
+<br><br>
+<img src="assets/teaser.jpg" width="520" alt="Segmentation, depth and cross-modal discrepancy maps of generative SR outputs">
 
 </div>
 
